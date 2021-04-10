@@ -9,6 +9,9 @@ from threading import Thread, Event, Timer
 from queue import Queue
 from collections import OrderedDict
 from socket import gethostbyname
+import sqlite3
+from datetime import datetime
+import pytz
 
 class PingSendFactory(Thread):
     def __init__(self, address, syncEvent, socketID, interval=1):
@@ -148,8 +151,6 @@ class PingSummary:
                         file=sys.stderr)
             self.setAlarm(self.timeout)  # Update the alarm if necessary
 
-            # sleep(0.01)  # Remove me
-
             # Update the waiting queue with the results of the received packets
             while self.pingRecv.queue.qsize() > 0:
                 reply = self.pingRecv.queue.get()
@@ -185,16 +186,18 @@ class PingSummary:
                     if req['rtt']:
                         self.alarm.cancel()
                         self.summary.add(req['req'].time,
-                                            req['req'].destination,
-                                            req['req'].sequence,
-                                            req['rtt'])
+                                         req['req'].destination,
+                                         req['req'].sequence,
+                                         req['rtt'])
                         if Global.args.verbose:
-                            print(f"{req['req'].time} "
-                                    f"{req['req'].destination} "
-                                    f"{req['req'].sequence} "
-                                    f"{req['rtt']}",
-                                    flush=True,
-                                    file=sys.stdout)
+                            print(
+                                  f"{mkISOTime(req['req'].time)} "
+                                  f"{req['req'].time} "
+                                  f"{req['req'].destination} "
+                                  f"{req['req'].sequence} "
+                                  f"{req['rtt']}",
+                                  flush=True,
+                                  file=sys.stdout)
                         del(self.pingsWaiting[req['idx']])
                     else:
                         break
@@ -222,6 +225,10 @@ class PeriodSummary:
     def __init__(self, summary_period=60):
         self.period = summary_period
         self.periodStart = None
+        db = os.path.join(os.path.dirname(__file__), 'pingtest-summ.sqlite')
+        self.con = sqlite3.connect(db)
+        self.cur = self.con.cursor()
+        self.createDB()
 
     def _initStats(self, start=None):
         self.periodStart = start
@@ -235,6 +242,18 @@ class PeriodSummary:
         self.count = 0
         self.totRTT = 0
 
+    def createDB(self):
+        self.cur.execute('''
+            create table if not exists pingsumm (
+                    date text primary key,
+                    unixdate real,
+                    min real,
+                    avg real,
+                    max real,
+                    dropped integer
+            )
+        ''')
+
     def add(self, t, addr, seq, rtt):
         if not self.periodStart:
             self._initStats(t)
@@ -244,17 +263,27 @@ class PeriodSummary:
                 avg = None
             else:
                 avg = self.totRTT / self.count
-            print(f'{self.periodStart},{self.minRTT},{avg},{self.maxRTT},{self.dropped}', flush=True)
+            isoTime = mkISOTime(self.periodStart)
+            row = [isoTime, self.periodStart, self.minRTT, avg, self.maxRTT, self.dropped]
+            if Global.args.verbose:
+                print(' '.join([str(x) for x in row]), flush=True)
+            sql = 'insert into pingsumm (date, unixdate, min, avg, max, dropped) values (?,?,?,?,?,?);'
+            self.cur.execute(sql, row)
+            self.con.commit()
+
             self._initStats(self.periodStart + self.period)
+        if rtt == 'Dropped':
+            self.dropped += 1
         else:
-            if rtt == 'Dropped':
-                self.dropped += 1
-            else:
-                if self.minRTT is None or rtt < self.minRTT:
-                    self.minRTT = rtt
-                if self.maxRTT is None or rtt > self.maxRTT:
-                    self.maxRTT = rtt
-                self.totRTT += rtt
+            if self.minRTT is None or rtt < self.minRTT:
+                self.minRTT = rtt
+            if self.maxRTT is None or rtt > self.maxRTT:
+                self.maxRTT = rtt
+            self.totRTT += rtt
+
+def mkISOTime(t):
+    timezone = pytz.timezone("NZ")
+    return timezone.localize(datetime.fromtimestamp(t)).isoformat()
 
 def main():
     parser = argparse.ArgumentParser(description='''
