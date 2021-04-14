@@ -11,7 +11,6 @@ from collections import OrderedDict
 from socket import gethostbyname
 import sqlite3
 from datetime import datetime
-import pytz
 
 class PingSendFactory(Thread):
     def __init__(self, address, syncEvent, socketID, interval=1):
@@ -26,7 +25,7 @@ class PingSendFactory(Thread):
         
     def stop(self):
         if Global.args.debug:
-            print(f'Stopping {self.__class__.__name__}', file=sys.stderr)
+            print(f'Stopping {self.__class__.__name__}', flush=True, file=sys.stderr)
         self.running.set()
         self.sleep.set()
         
@@ -57,7 +56,7 @@ class PingSendFactory(Thread):
                 print(f'{self.__class__.__name__}: '
                       f'EnQueued {qItem}. '
                       f'QLen: {self.queue.qsize()}. '
-                      f'Sleeping {self.interval}', file=sys.stderr)
+                      f'Sleeping {self.interval}', file=sys.stderr, flush=True)
             self.sleep.wait(self.interval)
 
 class PingRecvFactory(Thread):
@@ -70,7 +69,7 @@ class PingRecvFactory(Thread):
         
     def stop(self):
         if Global.args.debug:
-            print(f'Stopping {self.__class__.__name__}', file=sys.stderr)
+            print(f'Stopping {self.__class__.__name__}', file=sys.stderr, flush=True)
         self.running.set()
         
     def run(self):
@@ -90,8 +89,9 @@ class PingRecvFactory(Thread):
                         print(f'{self.__class__.__name__}: '
                             f'EnQueued {reply}. '
                             f'idx: {(reply.id, reply.sequence)}. '
-                            f'QLen: {self.queue.qsize()}. '
-                            , file=sys.stderr)
+                            f'QLen: {self.queue.qsize()}. ',
+                            flush=True,
+                            file=sys.stderr)
     
 class PingSummary:
     def __init__(self, address, interval=1, timeout=1):
@@ -108,7 +108,7 @@ class PingSummary:
 
     def getFirst(self, od):
         if len(od) > 0:
-            k = list(od.keys())[0]
+            k = list(od)[0]
             return od[k]
         else:
             return None
@@ -116,7 +116,7 @@ class PingSummary:
     def setDropped(self):
         req = self.getFirst(self.pingsWaiting)
         if Global.args.debug:
-            print(f'Setting {req} to "Dropped"', file=sys.stderr)
+            print(f'Setting {req} to "Dropped"', flush=True, file=sys.stderr)
         if req:
             req['rtt'] = 'Dropped'
             self.sync.set()
@@ -135,7 +135,7 @@ class PingSummary:
                         f'for {req["idx"]} '
                         f'Alarm: {self.alarm} ', 
                         f'Status: {self.alarm.is_alive()}', 
-                        file=sys.stderr)
+                        file=sys.stderr, flush=True)
     def run(self):
         while True:
             # Wait for something to happen: a packet sent, a packet received or an alarm
@@ -150,7 +150,7 @@ class PingSummary:
                     print(f'SendQueue got {req}. '
                         f'SendQLen: {self.pingSend.queue.qsize()} '
                         f'WaitQLen {len(self.pingsWaiting)}',
-                        file=sys.stderr)
+                        file=sys.stderr, flush=True)
             self.setAlarm(self.timeout)  # Update the alarm if necessary
 
             # Update the waiting queue with the results of the received packets
@@ -164,17 +164,17 @@ class PingSummary:
                     if Global.args.debug:
                         print(f'RecvQueue: Found id {idx} '
                             f'WaitQLen {len(self.pingsWaiting)}',
-                            file=sys.stderr)
+                            file=sys.stderr, flush=True)
                     if req == self.getFirst(self.pingsWaiting):
                         if Global.args.debug:
-                            print(f'PingsWaiting[0] has a rtt, so cancelling the alarm')
+                            print(f'PingsWaiting[0] has a rtt, so cancelling the alarm', file=sys.stderr, flush=True)
                         self.alarm.cancel()
                 else:
                     # Reply must have timed out and been removed
                     if Global.args.debug:
                         print(f'RecvQueue: Could not find id {idx} '
                             f'WaitQLen {len(self.pingsWaiting)}',
-                            file=sys.stderr)
+                            file=sys.stderr, flush=True)
 
             # Check to see if there are any items that can be summarised.
             # The first item in pingsWaiting has to have a rtt value to proceed
@@ -184,7 +184,7 @@ class PingSummary:
                     if Global.args.debug:
                             print(f'PingsWaiting[0] rtt: {req["rtt"]} '
                                 f'WaitQLen {len(self.pingsWaiting)}',
-                                file=sys.stderr)
+                                file=sys.stderr, flush=True)
                     if req['rtt']:
                         self.alarm.cancel()
                         self.summary.add(req['req'].time,
@@ -206,7 +206,7 @@ class PingSummary:
                 else:
                     if Global.args.debug:
                         print(f'PingsWaiting[0] None WaitQLen {len(self.pingsWaiting)}',
-                            file=sys.stderr)
+                            file=sys.stderr, flush=True)
                     break
 
             self.setAlarm(self.timeout)  # Update the alarm if necessary
@@ -268,7 +268,7 @@ class PeriodSummary:
             isoTime = mkISOTime(self.periodStart)
             row = [isoTime, self.periodStart, self.minRTT, avg, self.maxRTT, self.dropped]
             if Global.args.verbose:
-                print(' '.join([str(x) for x in row]), flush=True)
+                print(' '.join([str(x) for x in row]), flush=True, file=sys.stdout)
             sql = 'insert into pingsumm (date, unixdate, min, avg, max, dropped) values (?,?,?,?,?,?);'
             self.cur.execute(sql, row)
             self.con.commit()
@@ -284,20 +284,20 @@ class PeriodSummary:
             self.totRTT += rtt
 
 def mkISOTime(t):
-    timezone = pytz.timezone("NZ")
-    return timezone.localize(datetime.fromtimestamp(t)).isoformat()
+    # Returns an ISO timezone formatted date/time using the local timezone
+    return datetime.fromtimestamp(t).astimezone().isoformat()
 
 def main():
     parser = argparse.ArgumentParser(description='''
-        Pings a target and every minute prints a summary of min, average and max ping times
+        Pings a target and every minute generates a summary of min, average and max ping times
         along with the number of pings dropped.
         
-        Output is in csv format.
+        Summaries are saved to pingtest-summ.sqlite
     ''')
     parser.add_argument('target', nargs='?', default='google.co.nz', 
                         help='Target to ping')
     parser.add_argument('-v', '--verbose', action='store_true', 
-                         help='Display individual ping returns to stdout')
+                         help='Display individual ping returns and 1 minutes summaries to stderr')
     parser.add_argument('-d', '--debug', action='store_true', 
                          help='Display debug information')
     Global.args = parser.parse_args()
@@ -313,7 +313,7 @@ def main():
                 pass
             sleep(1)
         if not Global.ip:
-            print(f'Could not resolve {Global.args.target}')
+            print(f'Could not resolve {Global.args.target}', file=sys.stderr, flush=True)
             sys.exit(1)
 
         ping = PingSummary(Global.ip, timeout=5)
