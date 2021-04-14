@@ -228,7 +228,7 @@ class PeriodSummary:
         self.period = summary_period
         self.periodStart = None
         db = os.path.join(os.path.dirname(__file__), 'pingtest-summ.sqlite')
-        self.con = sqlite3.connect(db)
+        self.con = sqlite3.connect(db, timeout=20)
         self.cur = self.con.cursor()
         self.createDB()
 
