@@ -1,0 +1,13 @@
+#!/bin/bash
+
+source venv/bin/activate
+
+[ -f .env ] && source .env
+
+# psql() {
+#     /usr/bin/psql -d regatta "$@"
+# }
+# export -f psql
+
+ADDPS1='(pingtest) ' bash
+
