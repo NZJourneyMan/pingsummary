@@ -35,6 +35,8 @@ class PingSendFactory(Thread):
         seq = 0
         while not self.running.is_set():
             seq += 1
+            if seq > 0xFFFF:
+                seq = 1
             req = ICMPRequest(
                 destination=self.address,
                 id=PID,
