@@ -266,10 +266,10 @@ class PeriodSummary:
             else:
                 avg = self.totRTT / self.count
             isoTime = mkISOTime(self.periodStart)
-            row = [isoTime, self.periodStart, self.minRTT, avg, self.maxRTT, self.dropped]
+            row = [isoTime, self.periodStart, self.minRTT, avg, self.maxRTT, self.dropped, Global.args.target]
             if Global.args.verbose:
                 print(' '.join([str(x) for x in row]), flush=True, file=sys.stdout)
-            sql = 'insert into pingsumm (date, unixdate, min, avg, max, dropped) values (?,?,?,?,?,?);'
+            sql = 'insert into pingsumm (date, unixdate, min, avg, max, dropped, target) values (?,?,?,?,?,?,?);'
             self.cur.execute(sql, row)
             self.con.commit()
 
