@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 
 import os
+from os.path import join as pjoin, dirname
 import sys
 from time import sleep, time
 from icmplib import ICMPv4Socket, ICMPRequest, PID, ICMPError, ICMPLibError, TimeoutExceeded
 import argparse
 from threading import Thread, Event, Timer
+from subprocess import Popen
 from queue import Queue
 from collections import OrderedDict
 from socket import gethostbyname
@@ -227,7 +229,7 @@ class PeriodSummary:
     def __init__(self, summary_period=60):
         self.period = summary_period
         self.periodStart = None
-        db = os.path.join(os.path.dirname(__file__), 'pingtest-summ.sqlite')
+        db = pjoin(dirname(__file__), 'pingtest-summ.sqlite')
         self.con = sqlite3.connect(db, timeout=20)
         self.cur = self.con.cursor()
         self.createDB()
@@ -252,7 +254,8 @@ class PeriodSummary:
                     min real,
                     avg real,
                     max real,
-                    dropped integer
+                    dropped integer,
+                    target text
             )
         ''')
 
@@ -272,6 +275,13 @@ class PeriodSummary:
             sql = 'insert into pingsumm (date, unixdate, min, avg, max, dropped, target) values (?,?,?,?,?,?,?);'
             self.cur.execute(sql, row)
             self.con.commit()
+            if Global.args.image:
+                now = datetime.now()
+                if int(now.strftime('%M')) % 5 == 0:
+                    cmd = [pjoin(dirname(__file__), 'mkimage.py'), now.strftime('%Y-%m-%d')]
+                    if Global.args.debug:
+                        print(f'Running: {cmd}', flush=True, file=sys.stdout)
+                    doCmd_background(cmd)
 
             self._initStats(self.periodStart + self.period)
         if rtt == 'Dropped':
@@ -282,6 +292,13 @@ class PeriodSummary:
             if self.maxRTT is None or rtt > self.maxRTT:
                 self.maxRTT = rtt
             self.totRTT += rtt
+
+
+def doCmd_background(cmd):
+    def _doCmd(cmd):
+        Popen(cmd).wait()
+
+    Thread(target=_doCmd, args=[cmd], daemon=True).start()
 
 def mkISOTime(t):
     # Returns an ISO timezone formatted date/time using the local timezone
@@ -300,6 +317,8 @@ def main():
                          help='Display individual ping returns and 1 minutes summaries to stderr')
     parser.add_argument('-d', '--debug', action='store_true', 
                          help='Display debug information')
+    parser.add_argument('-i', '--image', action='store_true', 
+                         help='Dump today\'s summary graph every 5 minutes')
     Global.args = parser.parse_args()
 
     try:
