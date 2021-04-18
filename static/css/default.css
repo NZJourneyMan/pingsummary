@@ -1,0 +1,11 @@
+body {
+    -moz-background-size: cover;
+    -webkit-background-size: cover;
+    background-size: cover;
+    background-position: center center !important;
+    background-repeat: no-repeat !important;
+    background-attachment: fixed;
+}
+img {
+    max-width: 800;
+}

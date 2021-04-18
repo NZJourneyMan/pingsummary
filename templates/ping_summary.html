@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>View Ping Summary Graphs</title>
+        <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1, shrink-to-fit=no"
+        />
+
+        <!------------ CSS -------------->
+        <link
+            type="text/css"
+            rel="stylesheet"
+            href="https://unpkg.com/bootstrap@4.4.1/dist/css/bootstrap.min.css"
+        />
+        <link
+            type="text/css"
+            rel="stylesheet"
+            href="https://unpkg.com/bootstrap-vue@2.3.0/dist/bootstrap-vue.min.css"
+        />
+        <link
+            rel="stylesheet"
+            type="text/css"
+            href="static/css/default.css"
+        />
+
+    </head>
+
+    <body>
+        <div id="app">
+            <b-row>
+                <b-col md="auto">
+                    <b-calendar v-model="pickedDate" @context="submit" width=270></b-calendar>
+                </b-col>
+                <b-col v-if="imageFile">
+                    <b-img :src=imageFile fluid alt="Please select another date" @error="brokenImage"></img>
+                </b-col>
+            </b-row>
+
+        </div>
+
+        <!------------ SCRIPTS -------------->
+        <!-- development version, includes helpful console warnings -->
+        <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+        <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+        <!-- Load polyfills to support older browsers -->
+        <script
+            src="https://polyfill.io/v3/polyfill.min.js?features=es2015%2CIntersectionObserver"
+            crossorigin="anonymous"
+        ></script>
+
+        <!-- Load Vue followed by BootstrapVue -->
+        <script src="https://unpkg.com/vue@latest/dist/vue.min.js"></script>
+        <script src="https://unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue.min.js"></script>
+        <script src="static/scripts/ping_summary.js"></script>
+    </body>
+</html>

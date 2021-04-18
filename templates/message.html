@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>DSWC Leader Board</title>
+    <link rel="stylesheet" type="text/css" href="/static/leaderboard.css">
+</head>
+<body style="text-align: center">
+    <font size=30pt>
+        <p>{{ msg|safe }}</p>
+        <form id="ok" action="/" method="GET">
+            <input type="submit" value="{{ but }}">
+        </form>
+        <br>
+    </font>
+</body>
+</html>
+
