@@ -1,13 +1,12 @@
 #!/bin/bash
 
-source venv/bin/activate
+ROOTDIR=$(dirname $0)
+source $ROOTDIR/venv/bin/activate
 
-[ -f .env ] && source .env
+[ -f $ROOTDIR/.env ] && source $ROOTDIR/.env
 
-# psql() {
-#     /usr/bin/psql -d regatta "$@"
-# }
-# export -f psql
-
-ADDPS1='(pingtest) ' bash
-
+if [ "$1" ]; then
+    "$@"
+else
+    ADDPS1='(pingtest) ' bash
+fi
