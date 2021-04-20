@@ -1,4 +1,5 @@
 wheel
+matplotlib
 Flask==1.1.2
 icmplib==2.1.1
 python_dateutil==2.8.1

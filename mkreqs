@@ -2,4 +2,4 @@
 
 [ -z "$VIRTUAL_ENV" ] && source venv/bin/activate
 
-{ echo wheel; pipreqs --print; } > requirements.txt
+{ echo -e "wheel\nmatplotlib"; pipreqs --print; } > requirements.txt
