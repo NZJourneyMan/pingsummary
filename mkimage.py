@@ -63,9 +63,9 @@ def main():
     plot1.xaxis.set_major_formatter(formatter)
     plot1.set_xlim(startDateObj, endDateObj)
 
+    plot1.fill_between(pDate, max, color='yellow')
+    plot1.fill_between(pDate, avg, color='blue')
     plot1.fill_between(pDate, min, color='green')
-    plot1.fill_between(pDate, avg, min, color='blue')
-    plot1.fill_between(pDate, avg, max, color='yellow')
     plot1.set_ylim(0, 0.5)
     # plot1.set_xlabel('Date', fontsize=14)
     plot1.set_ylabel('Latency seconds', fontsize=10)
