@@ -4,7 +4,7 @@ import sys
 import sqlite3
 import pathlib 
 from os.path import dirname, join as pjoin
-from dateutil.parser import parse, isoparse
+from dateutil.parser import parse as dateparse
 from datetime import datetime, timedelta
 from argparse import ArgumentParser
 from matplotlib import pyplot as plt, dates as mdates, patches as mpatches, rcParams
@@ -30,14 +30,13 @@ def main():
     con = sqlite3.connect(pjoin(homeDir, 'pingtest-summ.sqlite'))
     cur = con.cursor()
     
-    startDateObj = parse(args.date).astimezone()
+    startDateObj = dateparse(args.date).astimezone()
     endDateObj = startDateObj + timedelta(hours=23, minutes=59, seconds=59, milliseconds=999)
 
     for line in cur.execute("select date, unixdate, min, avg, max, (dropped*100/60), target "
                             "from pingsumm where date(date, 'localtime') = date(?, 'localtime') ", (args.date,)):
 
         i += 1
-        # pDate.append(isoparse(line[0]).astimezone())
         pDate.append(datetime.fromtimestamp(line[1]).astimezone())
         min.append(float(removeNone(line[2])))
         avg.append(removeNone(line[3]))

@@ -112,5 +112,4 @@ venv.bak/
 .mypy_cache/
 
 # App data
-/images
-/pingtest-summ*.sqlite*
+/data

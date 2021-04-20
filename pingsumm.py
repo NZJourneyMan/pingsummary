@@ -1,17 +1,17 @@
 #!/usr/bin/env python3
 
 import os
-from os.path import join as pjoin, dirname
 import sys
+import argparse
+import sqlite3
+from os.path import join as pjoin, dirname
 from time import sleep, time
 from icmplib import ICMPv4Socket, ICMPRequest, PID, ICMPError, ICMPLibError, TimeoutExceeded
-import argparse
 from threading import Thread, Event, Timer
 from subprocess import Popen
 from queue import Queue
 from collections import OrderedDict
 from socket import gethostbyname
-import sqlite3
 from datetime import datetime
 
 class PingSendFactory(Thread):
