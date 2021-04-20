@@ -4,7 +4,7 @@ import os
 import sys
 import argparse
 import sqlite3
-from os.path import join as pjoin, dirname
+from os.path import join as pjoin, dirname, realpath
 from time import sleep, time
 from icmplib import ICMPv4Socket, ICMPRequest, PID, ICMPError, ICMPLibError, TimeoutExceeded
 from threading import Thread, Event, Timer
@@ -224,13 +224,14 @@ class PingSummary:
 class Global:
     args = None
     ip = None
+    rootDir = dirname(realpath(__file__))
 
 class PeriodSummary:
     def __init__(self, summary_period=60):
         self.period = summary_period
         self.periodStart = None
-        db = pjoin(dirname(__file__), 'pingtest-summ.sqlite')
-        self.con = sqlite3.connect(db, timeout=20)
+        dbName = pjoin(Global.rootDir, 'data/db/pingsumm.sqlite')
+        self.con = sqlite3.connect(dbName, timeout=20)
         self.cur = self.con.cursor()
         self.createDB()
 

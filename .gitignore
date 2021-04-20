@@ -3,6 +3,8 @@
 .pydevproject
 *.swp
 /.vscode
+.bash_history
+.lesshst
 
 # Local changes
 /.localenv

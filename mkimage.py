@@ -3,7 +3,7 @@
 import sys
 import sqlite3
 import pathlib 
-from os.path import dirname, join as pjoin
+from os.path import realpath, dirname, join as pjoin
 from dateutil.parser import parse as dateparse
 from datetime import datetime, timedelta
 from argparse import ArgumentParser
@@ -23,11 +23,13 @@ def main():
     avg = []
     max = []
     dropped = []
-    homeDir = dirname(__file__)
+    rootDir = dirname(realpath(__name__))
+    dbName = pjoin(rootDir, 'data/db/pingsumm.sqlite')
+    imagesDir = pjoin(rootDir, 'data/images')
 
-    pathlib.Path(pjoin(homeDir, 'images')).mkdir(exist_ok=True)
+    pathlib.Path(imagesDir).mkdir(exist_ok=True)
 
-    con = sqlite3.connect(pjoin(homeDir, 'pingtest-summ.sqlite'))
+    con = sqlite3.connect(dbName)
     cur = con.cursor()
     
     startDateObj = dateparse(args.date).astimezone()
@@ -89,7 +91,7 @@ def main():
     plt.legend(handles=[green_legend, blue_legend, yellow_legend, red_legend], 
             ncol=4, loc="center", bbox_to_anchor=(0, -0.034, 0.9, -0.11), fontsize='xx-small')
 
-    fileName = pjoin(homeDir, 'images', args.date)
+    fileName = pjoin(imagesDir, args.date)
     plt.savefig(fileName, bbox_inches='tight')
     # plt.show()
 
