@@ -277,12 +277,9 @@ class PeriodSummary:
             self.cur.execute(sql, row)
             self.con.commit()
             if Global.args.image:
-                now = datetime.now()
-                if int(now.strftime('%M')) % 5 == 0:
-                    cmd = [pjoin(dirname(__file__), 'mkimage.py'), now.strftime('%Y-%m-%d')]
-                    if Global.args.debug:
-                        print(f'Running: {cmd}', flush=True, file=sys.stdout)
-                    doCmd_background(cmd)
+                dateStr = datetime.fromtimestamp(self.periodStart).astimezone().strftime('%Y-%m-%d')
+                cmd = [pjoin(dirname(__file__), 'mkimage.py'), dateStr]
+                doCmd_background(cmd)
 
             self._initStats(self.periodStart + self.period)
         if rtt == 'Dropped':
@@ -299,6 +296,8 @@ def doCmd_background(cmd):
     def _doCmd(cmd):
         Popen(cmd).wait()
 
+    if Global.args.debug:
+        print(f'Running: {cmd}', flush=True, file=sys.stderr)
     Thread(target=_doCmd, args=[cmd], daemon=True).start()
 
 def mkISOTime(t):

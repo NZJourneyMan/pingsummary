@@ -13,7 +13,7 @@ var app = new Vue({
                 if (this.myTimer) { 
                     clearInterval(this.myTimer);
                 }
-                this.myTimer = setTimeout(this.submit, 300000);
+                this.myTimer = setTimeout(this.submit, 60_000);
                 this.imageFile = '/static/images/' + this.pickedDate + ".png?dummy=" + Math.random();
             }
         },
