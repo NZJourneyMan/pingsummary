@@ -1,5 +1,16 @@
 #!/bin/bash
 
+
+usage() {
+    echo "Usage: $(basename $0): [-h]"
+}
+
+if [ "$1" = -h ]; then
+    usage
+    exit 0
+fi
+
+
 ROOTDIR=$(dirname $0)
 
 gunicorn \

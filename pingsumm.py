@@ -312,7 +312,7 @@ def main():
         
         Summaries are saved to pingtest-summ.sqlite
     ''')
-    parser.add_argument('target', nargs='?', default='google.co.nz', 
+    parser.add_argument('target', nargs='?', default='8.8.8.8', 
                         help='Target to ping')
     parser.add_argument('-v', '--verbose', action='store_true', 
                          help='Display individual ping returns and 1 minutes summaries to stderr')

@@ -5,6 +5,15 @@ source $ROOTDIR/venv/bin/activate
 
 [ -f $ROOTDIR/.env ] && source $ROOTDIR/.env
 
+usage() {
+    echo "Usage: $(basename $0): [-h] [command and arguments]"
+}
+
+if [ "$1" = -h ]; then
+    usage
+    exit 0
+fi
+
 if [ "$1" ]; then
     "$@"
 else
