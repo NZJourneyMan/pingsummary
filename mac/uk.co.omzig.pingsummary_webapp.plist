@@ -3,16 +3,15 @@
 <plist version="1.0">
 <dict>
     <key>Label</key>
-    <string>uk.co.omzig.pingsummary</string>
+    <string>uk.co.omzig.pingsummary_webapp</string>
     <key>UserName</key>
-    <string>nobody</string>
+    <string>pingsumm</string>
     <key>GroupName</key>
-    <string>nobody</string>
+    <string>pingsumm</string>
     <key>ProgramArguments</key>
     <array>
         <string>/usr/local/pingsummary/startenv</string>
         <string>/usr/local/pingsummary/startwebapp.sh</string>
-        <string>-i</string>
     </array>
     <key>KeepAlive</key>
     <true/>

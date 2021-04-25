@@ -6,16 +6,18 @@
     <string>uk.co.omzig.pingsummary</string>
     <key>UserName</key>
     <string>root</string>
-    <key>GroupName</key>
-    <string>nobody</string>
     <key>umask</key>
-    <string>23</string>
+    <string>18</string>
     <key>ProgramArguments</key>
     <array>
         <string>/usr/local/pingsummary/startenv</string>
         <string>/usr/local/pingsummary/pingsumm.py</string>
         <string>-i</string>
     </array>
+    <key>StandardOutPath</key>
+    <string>/var/log/pingsumm.stdout</string>
+    <key>StandardErrorPath</key>
+    <string>/var/log/pingsumm.stderr</string>
     <key>KeepAlive</key>
     <true/>
 </dict>

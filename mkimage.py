@@ -25,7 +25,7 @@ def main():
     avg = []
     max = []
     dropped = []
-    rootDir = dirname(realpath(__name__))
+    rootDir = dirname(realpath(__file__))
     dbName = pjoin(rootDir, 'data/db/pingsumm.sqlite')
     imagesDir = pjoin(rootDir, 'data/images')
 

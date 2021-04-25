@@ -6,13 +6,41 @@ REPO="https://github.com/NZJourneyMan/pingsummary.git"
 
 USEPYTHON=""
 progname=$(basename $0)
+DEFAULT_INSTALL=/usr/local/pingsummary
 
 usage() {
     echo "$progname: [-h] [install dir]"
     echo
-    echo "Install dir defaults to /usr/local/pingsumm"
+    echo "Install dir defaults to $DEFAULT_INSTALL"
     echo "This script is idempotent, so can be rerun without causing problems"
     echo
+}
+
+mkMac() {
+    if ! id pingsumm &>/dev/null; then
+        LastUID=`dscl . -list /Users UniqueID | awk '{print $2}' | sort -n | tail -1`
+        let LastUID++
+        LastGID=`dscl . -list /Groups UniqueID | awk '{print $2}' | sort -n | tail -1`
+        if [ -z "$LastGID" ]; then
+            LastGID=$LastUID
+        else
+            let LastGID++
+        fi
+
+        dscl . create /Groups/pingsumm
+        dscl . create /Groups/pingsumm gid $LastGID
+
+        dscl . create /Users/pingsumm
+        dscl . create /Users/pingsumm RealName "Ping Summary Web user"
+        dscl . create /Users/pingsumm UniqueID $LastUID
+        dscl . create /Users/pingsumm PrimaryGroupID $LastGID
+        dscl . create /Users/pingsumm UserShell /bin/false
+        dscl . create /Users/pingsumm NFSHomeDirectory $installDir
+    fi
+    cp mac/uk.co.omzig.pingsummary.plist /Library/LaunchDaemons/
+    cp mac/uk.co.omzig.pingsummary_webapp.plist /Library/LaunchDaemons/
+    launchctl load /Library/LaunchDaemons/uk.co.omzig.pingsummary.plist
+    launchctl load /Library/LaunchDaemons/uk.co.omzig.pingsummary_webapp.plist
 }
 
 if [ "$1" = -h -o "$1" == --help ]; then
@@ -35,7 +63,7 @@ fi
 if [ "$1" ]; then
     installDir="$1"
 else
-    installDir="/usr/local/pingsumm"
+    installDir=$DEFAULT_INSTALL
 fi
 
 echo -n "Install into $installDir? ([y]es/no): "
@@ -118,10 +146,7 @@ case $OSTYPE in
         exit 1
         ;;
     darwin*)
-        cp mac/pingsummary.plist /Library/LaunchDaemons/
-        cp mac/pingsummary_webapp.plist /Library/LaunchDaemons/
-        launchctl load /Library/LaunchDaemons/uk.co.omzig.pingsummary.plist
-        launchctl load /Library/LaunchDaemons/uk.co.omzig.pingsummary_webapp.plist
+        mkMac
         ;;
     *)
         echo "Soz, I don't know this OS: $OSTYPE"

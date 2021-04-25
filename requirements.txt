@@ -1,5 +1,6 @@
 wheel
-matplotlib
-Flask==1.1.2
+gunicorn==20.1.0
+matplotlib==3.4.1
 icmplib==2.1.1
+Flask==1.1.2
 python_dateutil==2.8.1
