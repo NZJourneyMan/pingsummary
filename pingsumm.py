@@ -278,7 +278,10 @@ class PeriodSummary:
             self.con.commit()
             if Global.args.image:
                 dateStr = datetime.fromtimestamp(self.periodStart).astimezone().strftime('%Y-%m-%d')
-                cmd = [pjoin(dirname(__file__), 'mkimage.py'), dateStr]
+                cmd = [
+                    pjoin(Global.rootDir, 'mkimage.py'), 
+                    dateStr
+                ]
                 doCmd_background(cmd)
 
             self._initStats(self.periodStart + self.period)

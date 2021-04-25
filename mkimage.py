@@ -13,8 +13,10 @@ def removeNone(n):
     return 0 if n is None or n == 'None' else n
 
 def main():
-    parser = ArgumentParser(description='Generates a Graph for the requested date and outputs it to a file')
+    parser = ArgumentParser(description='Generates a Graph for the requested date and '
+       'outputs it to a file. Default file is "./data/images/$isodate"')
     parser.add_argument('date', help='Date to graph in the format YYYY-MM-DD')
+    parser.add_argument('-f', '--file', metavar='name', help='Name of the output file')
     args = parser.parse_args()
 
     i = 0
@@ -53,16 +55,18 @@ def main():
     print(f"{i} summarary lines found")
 
     rcParams['timezone'] = 'NZ'
-    locator = mdates.AutoDateLocator(minticks=12, maxticks=12)
+    locator = mdates.AutoDateLocator()
     formatter = mdates.ConciseDateFormatter(locator)
+    hl = mdates.HourLocator()
 
     fig, (plot1) = plt.subplots(figsize=(8,5), dpi=300)
     fig.set_facecolor('grey')
 
-    plot1.set_title(f'Ping Summary to {target}', fontsize=12)
+    plot1.set_title(f'Ping Summary: {target}', fontsize=12)
 
     plot1.xaxis.set_major_locator(locator)
     plot1.xaxis.set_major_formatter(formatter)
+    plot1.xaxis.set_minor_locator(hl)
     plot1.set_xlim(startDateObj, endDateObj)
 
     plot1.fill_between(pDate, max, color='yellow')
@@ -91,7 +95,7 @@ def main():
     plt.legend(handles=[green_legend, blue_legend, yellow_legend, red_legend], 
             ncol=4, loc="center", bbox_to_anchor=(0, -0.034, 0.9, -0.11), fontsize='xx-small')
 
-    fileName = pjoin(imagesDir, args.date)
+    fileName = args.file if args.file else pjoin(imagesDir, args.date)
     plt.savefig(fileName, bbox_inches='tight')
     # plt.show()
 
