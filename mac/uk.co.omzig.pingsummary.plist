@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>uk.co.omzig.pingsummary</string>
+    <key>UserName</key>
+    <string>root</string>
+    <key>GroupName</key>
+    <string>nobody</string>
+    <key>umask</key>
+    <string>23</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/usr/local/pingsummary/startenv</string>
+        <string>/usr/local/pingsummary/pingsumm.py</string>
+        <string>-i</string>
+    </array>
+    <key>KeepAlive</key>
+    <true/>
+</dict>
+</plist>
