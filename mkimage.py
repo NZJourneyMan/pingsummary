@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import os
 import sys
 import sqlite3
 import pathlib 
@@ -95,8 +96,11 @@ def main():
     plt.legend(handles=[green_legend, blue_legend, yellow_legend, red_legend], 
             ncol=4, loc="center", bbox_to_anchor=(0, -0.034, 0.9, -0.11), fontsize='xx-small')
 
-    fileName = args.file if args.file else pjoin(imagesDir, args.date)
-    plt.savefig(fileName, bbox_inches='tight')
+    baseFileName = args.file if args.file else pjoin(imagesDir, args.date)
+    tmpFileName = baseFileName + '-tmp.png'
+    fileName = baseFileName + '.png'
+    plt.savefig(tmpFileName, bbox_inches='tight')
+    os.rename(tmpFileName, fileName)
     # plt.show()
 
 if __name__ == '__main__':
