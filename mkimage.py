@@ -55,7 +55,18 @@ def main():
         sys.exit()    
     print(f"{i} summarary lines found")
 
-    rcParams['timezone'] = 'NZ'
+    # Set missing data to zero
+    i = 0
+    while i < len(pDate) - 1:
+        if pDate[i] + timedelta(seconds=61) < pDate[i+1]:
+            pDate.insert(i+1, pDate[i] + timedelta(seconds=60))
+            min.insert(i+1, 0)
+            avg.insert(i+1, 0)
+            max.insert(i+1, 0)
+            dropped.insert(i+1, 0)
+        i += 1
+
+    rcParams['timezone'] = pDate[0].tzname
     locator = mdates.AutoDateLocator()
     formatter = mdates.ConciseDateFormatter(locator)
     hl = mdates.HourLocator()
