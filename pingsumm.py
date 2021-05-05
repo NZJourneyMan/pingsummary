@@ -6,7 +6,7 @@ import argparse
 import sqlite3
 from os.path import join as pjoin, dirname, realpath
 from time import sleep, time
-from icmplib import ICMPv4Socket, ICMPRequest, PID, ICMPError, ICMPLibError, TimeoutExceeded
+from icmplib import ICMPv4Socket, ICMPRequest, PID, ICMPError, ICMPLibError, TimeoutExceeded, ICMPSocketError
 from threading import Thread, Event, Timer
 from subprocess import Popen
 from queue import Queue
@@ -46,6 +46,15 @@ class PingSendFactory(Thread):
                 sock.send(req)
             except ICMPError:
                 pass
+            except ICMPSocketError:
+                # Network unavailable. Skip stats as this is likely to be a local issue
+                continue
+            except OSError as e:
+                # Network unavailable. Skip stats as this is likely to be a local issue
+                if e.errno == 101:
+                    continue
+                else:
+                    raise(e)
 
             qItem = {
                 'idx': (self.socketID, seq),
