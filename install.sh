@@ -16,6 +16,7 @@ usage() {
     echo
 }
 
+# Install autostart for Macs
 mkMac() {
     if ! id pingsumm &>/dev/null; then
         LastUID=`dscl . -list /Users UniqueID | awk '{print $2}' | sort -n | tail -1`
@@ -42,6 +43,12 @@ mkMac() {
     launchctl load /Library/LaunchDaemons/uk.co.omzig.pingsummary.plist
     launchctl load /Library/LaunchDaemons/uk.co.omzig.pingsummary_webapp.plist
 }
+
+# Check python 3 version is 3.6 or up
+okPython3() {
+    $1 --version 2>/dev/null | egrep "3\.([6789]|1[[:digit:]])" &>/dev/null
+}
+
 
 if [ "$1" = -h -o "$1" == --help ]; then
     usage
@@ -77,16 +84,16 @@ if [ ! -d $installDir ]; then
     mkdir -p $installDir || exit 1
 fi
 
-# Find python 3
-if ! python --version 2>/dev/null | grep " 3" &>/dev/null; then
-    if ! python3 --version 2>/dev/null | grep " 3" &>/dev/null; then
-        echo "Please install python 3 to continue"
-        exit 1
-    else
-        USEPYTHON=$(which python3)
+USEPYTHON=""
+for py in python3.10 python3.9 python3.8 python3.7 python3.6 python; do
+    if okPython3 $py; then
+        USEPYTHON=$(which $py)
+        break
     fi
-else
-    USEPYTHON=$(which python)
+done
+if [ -z "$USEPYTHON" ]; then
+    echo "Please install python 3.6 - 3.10 along with the matching python3.X-venv"
+    exit 1
 fi
 
 
@@ -117,12 +124,14 @@ if [ ! -d venv ]; then
         echo "VENV installation failed"
         exit 1
     fi
+else
+    echo "venv already exists, skipping"
 fi
 
 source venv/bin/activate
 
 if ! which pip &>/dev/null; then
-    echo "Pip is not found, it should have come with the python 3 VENV"
+    echo "Pip is not found. Please install python3.X-venv to match $USEPYTHON"
     exit 1
 fi
 
@@ -145,13 +154,11 @@ echo
 case $OSTYPE in
     linux*)
         echo "Soz, linux startup support not implemented yet"
-        exit 1
         ;;
     darwin*)
         mkMac
         ;;
     *)
         echo "Soz, I don't know this OS: $OSTYPE"
-        exit 1
         ;;
 esac
