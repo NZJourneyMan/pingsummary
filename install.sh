@@ -110,11 +110,13 @@ else
     fi
 fi
 
-echo "$USEPYTHON -m venv venv"
-if ! $USEPYTHON -m venv venv
-then
-    echo "VENV installation failed"
-    exit 1
+if [ ! -d venv ]; then
+    echo "$USEPYTHON -m venv venv"
+    if ! $USEPYTHON -m venv venv
+    then
+        echo "VENV installation failed"
+        exit 1
+    fi
 fi
 
 source venv/bin/activate
