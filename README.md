@@ -8,11 +8,38 @@ Optionally the mkimage utility is also called to create a Ping summary graph ima
 * The summary web app. This simple webapp runs on port 2233 and displays the ping summary image for the selected day.  
 The graph image is refreshed every minute.
 
+Example graph:
+
+![Ping Summary Graph](https://raw.githubusercontent.com/NZJourneyMan/pingsummary/main/misc/README.png "Ping Summary Graph")
+
+## Installation
+
+```shell
+wget https://raw.github.com/nzjourneyman/pingsummary/install.sh
+chmod +x install.sh
+./install.sh
+```
+
+## Complete Removal
+```shell
+/usr/local/pingsummary/remove.sh
+```
+
+## Startup
+
+```shell
+sudo /usr/local/pingsummary/startenv /usr/local/pingsummary/pingsumm.py -i &
+/usr/local/pingsummary/startenv /usr/local/pingsummary/startwebapp.py
+```
+
+## Web Usage
+Browse to port 2233 on the host, eg http://localhost:2233
+
 ## Commands
 ### startenv
 This has two modes:
 1. Run by itself it will configure the environment and return you to the set environment in a bash subshell. Use `exit` to exit.
-1. Prepended to another command (eg: `./startenv ./mkimage -h`) it will set up the environment and run the command and arguments
+1. Prepended to another command. It will set up the environment then run the command and arguments.
 
 ```shell
 $ ./startenv ./mkimage.py -h
@@ -63,13 +90,11 @@ optional arguments:
   -h, --help  show this help message and exit
   ```
 
-  ![Ping Summary Graph](https://raw.githubusercontent.com/NZJourneyMan/pingsummary/main/misc/README.png "Ping Summary Graph")
+### install.sh
+Install script. Requires root privs. 
 
-  ### install.sh
-  Install script. Requires root privs. 
-
- ```shell
- $ ./install.sh -h
+```shell
+$ ./install.sh -h
 install.sh: [-h] [install dir]
 
 Install dir defaults to /usr/local/pingsumm
