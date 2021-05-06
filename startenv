@@ -17,5 +17,5 @@ fi
 if [ "$1" ]; then
     "$@"
 else
-    ADDPS1='(pingtest) ' bash
+    bash --rcfile $ROOTDIR/env.bashrc
 fi
